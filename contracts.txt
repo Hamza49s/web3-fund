@@ -1,0 +1,17 @@
+token:  0xE8b206Af9EC710D5d8122b2f3dB6370b68B2b3EC
+https://snowtrace.io/address/0xE8b206Af9EC710D5d8122b2f3dB6370b68B2b3EC/contract/43114/readProxyContract?chainId=43114
+
+rental marketplace
+0x979b41f111c6d1075C8f9d757F6988ff59286F73
+
+dexsell:
+0xD21027831BBfa748632152F873dfD0a805764289
+
+marketplace: 
+0xFAFc60f8cF2d605E75be192FC1bf107720804eB3
+
+staking token :
+0x8ca364F12aE7d2492b8411aF4AF9C736BB07a34b
+
+
+

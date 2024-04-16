@@ -13,7 +13,7 @@ contract TestingContract is ERC1155PausableUpgradeable, UUPSUpgradeable {
     using MetadataURI for string;
 
     //     State Varibles      //
-
+   
     address public burnAddress;
     address public owner;
     address payable public fundsWallet;
