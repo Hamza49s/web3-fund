@@ -58,12 +58,12 @@ module.exports = {
   networks: {
    
     sepolia: {
-      url: "https://eth-sepolia.g.alchemy.com/v2/Jj_luMlU_qU-AE5UHvF9pngQFbw6s8wm",
-      accounts: ["c359eec1563db748a9681cfbd2ba2408b28188f52d2cab9f23b688ebf688e47a"],
+      url: "",
+      accounts: [],
     },
   },
   etherscan: {
-    apiKey: "NV774QI9Q8UYWC2URUCGNXC86ENAG2HXSA",
+    apiKey: "",
   },
 };
 
