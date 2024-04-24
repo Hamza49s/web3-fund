@@ -31,7 +31,7 @@ contract TestingContract is ERC1155PausableUpgradeable, UUPSUpgradeable {
     mapping(uint256 => uint) public mintPrice;
     mapping(uint256 => MintingPeriod) public mintingPeriods;
     mapping(uint256 => address) private nftOwners;
-    mapping(uint256 => uint) public royaltyPercentageByID;
+    // mapping(uint256 => uint) public royaltyPercentageByID;
     mapping(uint256 => mapping(address => bool)) private whitelistByID;
     mapping(uint256 => mapping(address => bool)) private blacklistByID;
 
@@ -60,7 +60,7 @@ contract TestingContract is ERC1155PausableUpgradeable, UUPSUpgradeable {
         address indexed recipient,
         uint amount
     );
-    event RoyaltyPercentageUpdated(uint newRoyaltyPercentage);
+    // event RoyaltyPercentageUpdated(uint newRoyaltyPercentage);
     event OwnershipTransferred(
         address indexed previousOwner,
         address indexed newOwner
@@ -195,17 +195,17 @@ contract TestingContract is ERC1155PausableUpgradeable, UUPSUpgradeable {
         baseURI = _uri;
     }
 
-    function setRoyaltyPercentage(
-        uint _id,
-        uint _royaltyPercentage
-    ) external onlyOwner {
-        require(
-            _royaltyPercentage <= 100,
-            "Royalty percentage must be between 0 and 100"
-        );
-        royaltyPercentageByID[_id] = _royaltyPercentage;
-        emit RoyaltyPercentageUpdated(_royaltyPercentage);
-    }
+    // function setRoyaltyPercentage(
+    //     uint _id,
+    //     uint _royaltyPercentage
+    // ) external onlyOwner {
+    //     require(
+    //         _royaltyPercentage <= 100,
+    //         "Royalty percentage must be between 0 and 100"
+    //     );
+    //     royaltyPercentageByID[_id] = _royaltyPercentage;
+    //     emit RoyaltyPercentageUpdated(_royaltyPercentage);
+    // }
 
     function withdrawTokens(address _token) external onlyOwner {
         require(_token != address(0), "Invalid token address");
@@ -312,39 +312,52 @@ contract TestingContract is ERC1155PausableUpgradeable, UUPSUpgradeable {
         emit Burned(id, amount, msg.sender);
     }
 
-    function _safeTransferFromWithRoyalty(
-        address from,
-        address to,
-        uint id,
-        uint amount,
-        bytes memory data
-    ) internal {
-        // Calculate total price based on amount being transferred
-        uint256 totalPrice = mintPrice[id] * amount;
+    // function _safeTransferFromWithRoyalty(
+    //     address from,
+    //     address to,
+    //     uint id,
+    //     uint amount,
+    //     bytes memory data
+    // ) internal {
+    //     // Calculate total price based on amount being transferred
+    //     uint256 totalPrice = mintPrice[id] * amount;
 
-        // Calculate royalty amount
-        uint256 royaltyPercentage = royaltyPercentageByID[id];
-        uint256 royaltyAmount = (totalPrice * royaltyPercentage) / 100;
+    //     // Calculate royalty amount
+    //     uint256 royaltyPercentage = royaltyPercentageByID[id];
+    //     uint256 royaltyAmount = (totalPrice * royaltyPercentage) / 100;
 
-        // Deduct royalty from total price
-        uint256 totalPriceAfterRoyalty = totalPrice - royaltyAmount;
+    //     // Deduct royalty from total price
+    //     uint256 totalPriceAfterRoyalty = totalPrice - royaltyAmount;
 
-        // Transfer tokens to funds wallet after deducting royalty
-        IERC20 token = IERC20(mintingTokenAddress);
-        require(
-            token.transferFrom(from, fundsWallet, totalPriceAfterRoyalty),
-            "Transfer failed"
-        );
+    //     // Transfer tokens to funds wallet after deducting royalty
+    //     IERC20 token = IERC20(mintingTokenAddress);
+    //     require(
+    //         token.transferFrom(from, fundsWallet, totalPriceAfterRoyalty),
+    //         "Transfer failed"
+    //     );
 
-        // Call parent _safeTransferFrom function
-        super._safeTransferFrom(from, to, id, amount, data);
+    //     // Call parent _safeTransferFrom function
+    //     super._safeTransferFrom(from, to, id, amount, data);
 
-        // Emit event for tokens transferred
-        emit TokensTransferred(from, to, id, amount);
+    //     // Emit event for tokens transferred
+    //     emit TokensTransferred(from, to, id, amount);
 
-        // Emit event for royalties paid
-        emit RoyaltiesPaid(id, to, royaltyAmount);
-    }
+    //     // Emit event for royalties paid
+    //     emit RoyaltiesPaid(id, to, royaltyAmount);
+    // }
+    function _safeTransferFrom(
+    address from,
+    address to,
+    uint256 id,
+    uint256 amount,
+    bytes memory data
+) internal override  {
+    // Transfer tokens directly from 'from' to 'to'
+    super._safeTransferFrom(from, to, id, amount, data);
+
+    // Emit event for tokens transferred
+    emit TokensTransferred(from, to, id, amount);
+}
 
     function batchWhitelist(
         uint[] calldata ids,
