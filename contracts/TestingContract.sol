@@ -34,6 +34,7 @@ contract TestingContract is ERC1155PausableUpgradeable, UUPSUpgradeable {
     // mapping(uint256 => uint) public royaltyPercentageByID;
     mapping(uint256 => mapping(address => bool)) private whitelistByID;
     mapping(uint256 => mapping(address => bool)) private blacklistByID;
+      mapping(uint256 => uint256) public mintedSupply;
 
     //    Struct     //
     struct MintingPeriod {
@@ -81,6 +82,7 @@ contract TestingContract is ERC1155PausableUpgradeable, UUPSUpgradeable {
         uint amount
     );
     event Burned(uint indexed id, uint amount, address indexed burner);
+     event NFTMinted(uint256 indexed id, address indexed to, uint256 amount);
 
     function initialize() public initializer {
         // ERC1155PausableUpgradeable.
@@ -165,9 +167,11 @@ contract TestingContract is ERC1155PausableUpgradeable, UUPSUpgradeable {
 
         _mint(to, id, amount, "");
         mintingPeriods[id].supply -= amount;
+        mintedSupply[id] += amount;
 
         emit NFTCreated(id, amount, mintPrice[id], block.timestamp);
         emit NFTAdded(id);
+        emit NFTMinted(id, to, amount);
     }
 
     function setMintingTokenAddress(address _tokenAddress) external onlyOwner {
@@ -400,4 +404,9 @@ contract TestingContract is ERC1155PausableUpgradeable, UUPSUpgradeable {
             emit AddressAddedToBlacklist(id, account);
         }
     }
+  function getMintedAmountByID(uint256 id) external view returns (uint256) {
+        require(id < _idCounter, "Invalid ID");
+        return mintedSupply[id];
+    }
+
 }
