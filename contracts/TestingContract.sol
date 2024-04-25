@@ -31,7 +31,7 @@ contract TestingContract is ERC1155PausableUpgradeable, UUPSUpgradeable {
     mapping(uint256 => uint) public mintPrice;
     mapping(uint256 => MintingPeriod) public mintingPeriods;
     mapping(uint256 => address) private nftOwners;
-    // mapping(uint256 => uint) public royaltyPercentageByID;
+    mapping(uint256 => uint) public royaltyPercentageByID;
     mapping(uint256 => mapping(address => bool)) private whitelistByID;
     mapping(uint256 => mapping(address => bool)) private blacklistByID;
       mapping(uint256 => uint256) public mintedSupply;
@@ -61,7 +61,7 @@ contract TestingContract is ERC1155PausableUpgradeable, UUPSUpgradeable {
         address indexed recipient,
         uint amount
     );
-    // event RoyaltyPercentageUpdated(uint newRoyaltyPercentage);
+    event RoyaltyPercentageUpdated(uint newRoyaltyPercentage);
     event OwnershipTransferred(
         address indexed previousOwner,
         address indexed newOwner
@@ -199,17 +199,17 @@ contract TestingContract is ERC1155PausableUpgradeable, UUPSUpgradeable {
         baseURI = _uri;
     }
 
-    // function setRoyaltyPercentage(
-    //     uint _id,
-    //     uint _royaltyPercentage
-    // ) external onlyOwner {
-    //     require(
-    //         _royaltyPercentage <= 100,
-    //         "Royalty percentage must be between 0 and 100"
-    //     );
-    //     royaltyPercentageByID[_id] = _royaltyPercentage;
-    //     emit RoyaltyPercentageUpdated(_royaltyPercentage);
-    // }
+    function setRoyaltyPercentage(
+        uint _id,
+        uint _royaltyPercentage
+    ) external onlyOwner {
+        require(
+            _royaltyPercentage <= 100,
+            "Royalty percentage must be between 0 and 100"
+        );
+        royaltyPercentageByID[_id] = _royaltyPercentage;
+        emit RoyaltyPercentageUpdated(_royaltyPercentage);
+    }
 
     function withdrawTokens(address _token) external onlyOwner {
         require(_token != address(0), "Invalid token address");
@@ -349,19 +349,42 @@ contract TestingContract is ERC1155PausableUpgradeable, UUPSUpgradeable {
     //     // Emit event for royalties paid
     //     emit RoyaltiesPaid(id, to, royaltyAmount);
     // }
-    function _safeTransferFrom(
-    address from,
-    address to,
-    uint256 id,
-    uint256 amount,
-    bytes memory data
-) internal override  {
-    // Transfer tokens directly from 'from' to 'to'
-    super._safeTransferFrom(from, to, id, amount, data);
+//     function _safeTransferFrom(
+//     address from,
+//     address to,
+//     uint256 id,
+//     uint256 amount,
+//     bytes memory data
+// ) internal override  {
+//     // Transfer tokens directly from 'from' to 'to'
+//     super._safeTransferFrom(from, to, id, amount, data);
 
-    // Emit event for tokens transferred
-    emit TokensTransferred(from, to, id, amount);
-}
+//     // Emit event for tokens transferred
+//     emit TokensTransferred(from, to, id, amount);
+// }
+function _safeTransferFrom(
+        address from,
+        address to,
+        uint256 id,
+        uint256 amount,
+        bytes memory data
+    ) internal override {
+        // Transfer tokens directly from 'from' to 'to'
+        super._safeTransferFrom(from, to, id, amount, data);
+
+        // Calculate royalty amount
+        uint256 totalPrice = mintPrice[id] * amount;
+        uint256 royaltyAmount = (totalPrice * royaltyPercentageByID[id]) / 100;
+
+        // Transfer royalties to the funds wallet
+        IERC20(mintingTokenAddress).transferFrom(from, fundsWallet, royaltyAmount);
+
+        // Emit event for tokens transferred
+        emit TokensTransferred(from, to, id, amount);
+        // Emit event for royalties paid
+        emit RoyaltiesPaid(id, fundsWallet, royaltyAmount);
+    }
+
 
     function batchWhitelist(
         uint[] calldata ids,
